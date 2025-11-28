@@ -88,7 +88,7 @@ export function UserProfile() {
               variant='primary'
               onClick={handleUpdate}
               isLoading={updateProfile.isPending}
-              className='w-full lg:w-auto mt-4'
+              className='w-full lg:w-auto !mt-6'
             >
               Update Profile
             </Button>

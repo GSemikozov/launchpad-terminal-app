@@ -14,7 +14,7 @@ export function OrdersPage() {
       />
       <div className='flex-1 lg:ml-64'>
         <Header onMenuClick={() => setIsMobileSidebarOpen(true)} />
-        <main className='w-full px-4 py-8 lg:container lg:mx-auto'>
+        <main className='w-full px-4 py-8 xl:container xl:mx-auto'>
           <div className='mb-6'>
             <h1 className='text-3xl font-bold text-white'>My Orders</h1>
             <p className='text-gray-400 mt-2'>Manage your limit orders</p>

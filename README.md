@@ -2,15 +2,6 @@
 
 A modern Solana-based meme token launchpad application built with React, TypeScript, and Tailwind CSS. Create, manage, and trade tokens on the Solana blockchain with real-time price updates and order management.
 
-## Features
-
-- **Token Creation**: Create new meme tokens with custom metadata, images, and launch parameters
-- **Real-time Updates**: Live token prices and market data via WebSocket (Centrifugo)
-- **Order Management**: Create, view, and manage limit orders for token trading
-- **Portfolio Tracking**: Monitor your token holdings and portfolio performance
-- **Wallet Integration**: Full Solana wallet adapter support (Phantom, Solflare, etc.)
-- **Responsive Design**: Mobile-first UI with smooth animations and modern UX
-
 ## Getting Started
 
 ### Prerequisites
@@ -144,7 +135,7 @@ import { CreateTokenForm } from '@features/token';
 import { API_ENDPOINTS } from '@app/config';
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Core
 
@@ -179,7 +170,7 @@ import { API_ENDPOINTS } from '@app/config';
 - **Biome** - Fast linter and formatter
 - **TypeScript** - Static type checking
 
-## 🔌 API Integration
+## API Integration
 
 ### API Endpoints
 
@@ -218,7 +209,7 @@ Real-time token prices are received via Centrifugo WebSocket:
 - Ledger
 - And other Solana wallet adapters
 
-## 📱 Pages
+## Pages
 
 ### Home (`/`)
 
@@ -252,6 +243,6 @@ Real-time token prices are received via Centrifugo WebSocket:
 - View portfolio holdings
 - Token statistics
 
-## 📄 License
+## License
 
 MIT

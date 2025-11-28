@@ -18,6 +18,9 @@ export type { CardProps, TokenCardProps } from './Card';
 export { Modal } from './Modal';
 export type { ModalProps } from './Modal';
 
+export { Select } from './Select';
+export type { SelectProps, SelectOption } from './Select';
+
 export { Table, TableHeader, TableCell, TableRow } from './Table';
 export type { TableProps, TableHeaderProps, TableCellProps, TableRowProps } from './Table';
 

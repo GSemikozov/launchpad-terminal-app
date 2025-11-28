@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useActiveOrders, useCancelOrder, useMyOrders, type Order, type OrderStatus } from '@entities/order';
-import { useToast } from '@shared/ui';
+import { Select, useToast } from '@shared/ui';
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   pending: '#ffc107',
@@ -30,8 +30,13 @@ export const OrdersList: React.FC = () => {
   const cancelOrder = useCancelOrder();
 
   const walletAddress = publicKey?.toBase58();
-  const { data: allOrders, isLoading: allLoading } = useMyOrders(walletAddress);
-  const { data: activeOrders, isLoading: activeLoading } = useActiveOrders(walletAddress);
+  
+  // Temporarily disable API requests when using mock data
+  // Check if we're using mock data (when allOrders is undefined/null and we show mock)
+  const [useMockOnly, setUseMockOnly] = useState(false);
+  
+  const { data: allOrders, isLoading: allLoading } = useMyOrders(useMockOnly ? undefined : walletAddress);
+  const { data: activeOrders, isLoading: activeLoading } = useActiveOrders(useMockOnly ? undefined : walletAddress);
 
   const isLoading = allLoading || activeLoading;
 
@@ -97,6 +102,31 @@ export const OrdersList: React.FC = () => {
     return price.toFixed(6);
   };
 
+  const statusOptions = useMemo(
+    () => [
+      { value: 'all', label: 'All' },
+      { value: 'pending', label: 'Pending' },
+      { value: 'triggered', label: 'Triggered' },
+      { value: 'executing', label: 'Executing' },
+      { value: 'completed', label: 'Completed' },
+      { value: 'failed', label: 'Failed' },
+      { value: 'cancelled', label: 'Cancelled' },
+      { value: 'expired', label: 'Expired' },
+    ],
+    []
+  );
+
+  // Disable API requests when using mock data only
+  useEffect(() => {
+    if (allOrders !== undefined && allOrders !== null) {
+      if (allOrders.length === 0 && !useMockOnly) {
+        setUseMockOnly(true);
+      }
+    } else if (!useMockOnly && !isLoading) {
+      setUseMockOnly(true);
+    }
+  }, [allOrders, useMockOnly, isLoading]);
+
   if (!walletAddress) {
     return (
       <div className='rounded-xl border border-dark-border bg-dark-card p-8 text-center text-gray-400'>
@@ -110,20 +140,12 @@ export const OrdersList: React.FC = () => {
       <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
         <div className='flex flex-col gap-3 md:flex-row md:items-center'>
           <label className='text-sm text-gray-400'>Filter by status</label>
-          <select
+          <Select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as OrderStatus | 'all')}
-            className='w-full md:w-64 rounded-lg border border-dark-border bg-dark-card px-3 py-2 text-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/60'
-          >
-            <option value='all'>All</option>
-            <option value='pending'>Pending</option>
-            <option value='triggered'>Triggered</option>
-            <option value='executing'>Executing</option>
-            <option value='completed'>Completed</option>
-            <option value='failed'>Failed</option>
-            <option value='cancelled'>Cancelled</option>
-            <option value='expired'>Expired</option>
-          </select>
+            onChange={(value) => setStatusFilter(value as OrderStatus | 'all')}
+            options={statusOptions}
+            className='w-full md:w-64'
+          />
         </div>
         <div className='flex items-center gap-2 text-sm text-gray-300'>
           <span className='px-3 py-1 rounded-full bg-dark-lighter border border-dark-border'>

@@ -1,6 +1,6 @@
-import { Centrifuge, type Subscription } from 'centrifuge';
+import { type Subscription } from 'centrifuge';
 import { useEffect, useRef, useState } from 'react';
-import { CENTRIFUGO_CONFIG } from '@app/config/centrifugo';
+import { getCentrifugeInstance, releaseCentrifugeInstance, getOrCreateSubscription, releaseSubscription, subscribeToConnection } from './centrifugeInstance';
 
 export interface UseCentrifugoOptions {
   channel: string;
@@ -20,7 +20,7 @@ export function useCentrifugo({
   const [isConnected, setIsConnected] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const centrifugeRef = useRef<Centrifuge | null>(null);
+  const centrifugeRef = useRef<ReturnType<typeof getCentrifugeInstance>>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
 
   useEffect(() => {
@@ -29,48 +29,40 @@ export function useCentrifugo({
       return;
     }
 
-    if (!CENTRIFUGO_CONFIG.URL || !CENTRIFUGO_CONFIG.TOKEN) {
+    const centrifuge = getCentrifugeInstance();
+    if (!centrifuge) {
       setError(null);
       return;
     }
 
-    const centrifuge = new Centrifuge(CENTRIFUGO_CONFIG.URL, {
-      token: CENTRIFUGO_CONFIG.TOKEN,
+    centrifugeRef.current = centrifuge;
+
+    // Subscribe to connection events via callback system to avoid memory leaks
+    const unsubscribe = subscribeToConnection({
+      onConnected: () => {
+        setIsConnected(true);
+        setError(null);
+      },
+      onDisconnected: (reason) => {
+        setIsConnected(false);
+        // Only set error for unexpected disconnections
+        if (reason && reason !== 'disconnect called') {
+          setError(new Error(`Disconnected: ${reason}`));
+        }
+      },
+      onError: (err) => {
+        setError(err);
+      },
     });
 
-    centrifuge.on('connected', () => {
+    // Check if already connected
+    if (centrifuge.state === 'connected') {
       setIsConnected(true);
-      setError(null);
-    });
-
-    centrifuge.on('disconnected', (ctx) => {
-      setIsConnected(false);
-      if (ctx.reason) {
-        setError(new Error(`Disconnected: ${ctx.reason}`));
-        console.error('Centrifugo disconnected:', ctx.reason);
-      }
-    });
-
-    centrifuge.on('error', (ctx) => {
-      const errorMessage = (ctx as any).message || 'Unknown error';
-      setError(new Error(`Centrifugo error: ${errorMessage}`));
-      console.error('Centrifugo error:', ctx);
-    });
-
-    try {
-      centrifuge.connect();
-      centrifugeRef.current = centrifuge;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to connect to Centrifugo'));
-      console.error('Failed to initialize Centrifuge:', err);
     }
 
     return () => {
-      try {
-        centrifuge.disconnect();
-      } catch (err) {
-        console.error('Error disconnecting Centrifugo:', err);
-      }
+      unsubscribe();
+      releaseCentrifugeInstance();
       centrifugeRef.current = null;
     };
   }, [enabled]);
@@ -78,54 +70,77 @@ export function useCentrifugo({
   useEffect(() => {
     if (!enabled || !centrifugeRef.current || !channel) return;
 
-    const centrifuge = centrifugeRef.current;
+    // Get or create subscription with reference counting
+    const subscription = getOrCreateSubscription(channel);
+    if (!subscription) {
+      return;
+    }
 
-    // Subscribe to channel
-    const subscription = centrifuge.newSubscription(channel);
+    subscriptionRef.current = subscription;
 
-    subscription.on('publication', (ctx) => {
+    const handlePublication = (ctx: any) => {
       try {
         onMessage?.(ctx.data);
       } catch (err) {
         console.error('Error handling message:', err);
       }
-    });
+    };
 
-    subscription.on('subscribed', () => {
+    const handleSubscribed = () => {
       setIsSubscribed(true);
       setError(null);
       onSubscribe?.();
-    });
+    };
 
-    subscription.on('unsubscribed', (ctx) => {
+    const handleUnsubscribed = (ctx: any) => {
       setIsSubscribed(false);
-      if (ctx.reason) {
+      // Only log unexpected unsubscriptions, not normal cleanup
+      if (ctx.reason && ctx.reason !== 'unsubscribe called') {
         setError(new Error(`Unsubscribed: ${ctx.reason}`));
         console.error(`Unsubscribed from channel ${channel}:`, ctx.reason);
       }
       onUnsubscribe?.();
-    });
+    };
 
-    subscription.on('error', (ctx) => {
+    const handleError = (ctx: any) => {
       const errorMessage = (ctx as any).message || 'Unknown error';
       setError(new Error(`Subscription error: ${errorMessage}`));
       console.error(`Subscription error on channel ${channel}:`, ctx);
-    });
+    };
 
-    try {
-      subscription.subscribe();
-      subscriptionRef.current = subscription;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to subscribe to channel'));
-      console.error('Failed to subscribe to channel:', err);
+    // Add event listeners
+    subscription.on('publication', handlePublication);
+    subscription.on('subscribed', handleSubscribed);
+    subscription.on('unsubscribed', handleUnsubscribed);
+    subscription.on('error', handleError);
+
+    // Check if already subscribed
+    if (subscription.state === 'subscribed') {
+      setIsSubscribed(true);
+    } else {
+      // Subscribe if not already subscribed
+      try {
+        subscription.subscribe();
+      } catch (err) {
+        // If subscription already exists, that's okay - it means another component already subscribed
+        if (err instanceof Error && err.message.includes('already exists')) {
+          setIsSubscribed(true);
+        } else {
+          setError(err instanceof Error ? err : new Error('Failed to subscribe to channel'));
+          console.error('Failed to subscribe to channel:', err);
+        }
+      }
     }
 
     return () => {
-      try {
-        subscription.unsubscribe();
-      } catch (err) {
-        console.error('Error unsubscribing from channel:', err);
-      }
+      // Remove event listeners
+      subscription.off('publication', handlePublication);
+      subscription.off('subscribed', handleSubscribed);
+      subscription.off('unsubscribed', handleUnsubscribed);
+      subscription.off('error', handleError);
+      
+      // Release subscription reference
+      releaseSubscription(channel);
       subscriptionRef.current = null;
     };
   }, [channel, enabled, onMessage, onSubscribe, onUnsubscribe]);

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTokensLive, useInfiniteTokens, type Token } from '@entities/token';
 import { useTokenPrices } from '@shared/lib/centrifugo';
-import { Input, TokenCard, TokenCardSkeleton, useToast } from '@shared/ui';
+import { Input, Select, TokenCard, TokenCardSkeleton, useToast } from '@shared/ui';
 import { SearchIcon, FireIcon } from '@shared/ui/icons';
 
 export function TokenList() {
@@ -160,16 +160,17 @@ export function TokenList() {
             leftIcon={<SearchIcon className='h-5 w-5' />}
             className='flex-1'
           />
-          <select
+          <Select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className='rounded-xl border border-dark-border bg-dark-card px-4 py-2.5 text-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dark'
-          >
-            <option value='volume'>Volume 24h</option>
-            <option value='market_cap'>Market Cap</option>
-            <option value='price'>Price</option>
-            <option value='created_at'>Recently Created</option>
-          </select>
+            onChange={(value) => setSortBy(value as any)}
+            options={[
+              { value: 'volume', label: 'Volume 24h' },
+              { value: 'market_cap', label: 'Market Cap' },
+              { value: 'price', label: 'Price' },
+              { value: 'created_at', label: 'Recently Created' },
+            ]}
+            className='min-w-[180px]'
+          />
         </div>
       </div>
 

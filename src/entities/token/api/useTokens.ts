@@ -66,7 +66,7 @@ export function useInfiniteTokens(params?: Omit<UseTokensParams, 'page'>) {
   });
 }
 
-export function useTokensLive(params?: UseTokensParams) {
+export function useTokensLive(params?: Omit<UseTokensParams, 'page'>) {
   return useQuery({
     queryKey: QUERY_KEYS.tokens.live(params),
     queryFn: async () => {
