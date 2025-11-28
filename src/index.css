@@ -1,0 +1,37 @@
+@import './app/styles/wallet-adapter.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-dark-border;
+  }
+
+  body {
+    @apply bg-dark font-sans text-white antialiased;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-primary;
+  }
+
+  .text-gradient-secondary {
+    @apply bg-clip-text text-transparent bg-gradient-secondary;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 0 20px rgba(20, 241, 149, 0.5);
+  }
+}

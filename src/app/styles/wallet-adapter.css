@@ -1,0 +1,89 @@
+/* Wallet adapter custom styles - pump.fun theme */
+
+/* Wallet Modal */
+.wallet-adapter-modal-wrapper {
+  background: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(8px);
+}
+
+.wallet-adapter-modal {
+  background: #1a1b23 !important;
+  border: 1px solid #ff00ff !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 0 40px rgba(255, 0, 255, 0.4) !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.wallet-adapter-modal-list li {
+  background: #0a0b0d !important;
+  border: 1px solid #2a2b33 !important;
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+  transition: all 0.2s !important;
+}
+
+.wallet-adapter-modal-list li:hover {
+  border-color: #ff00ff !important;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.3) !important;
+}
+
+.wallet-adapter-button {
+  background: linear-gradient(135deg, #ff00ff 0%, #9945ff 100%) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+  padding: 0.625rem 1rem !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  opacity: 0.9 !important;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5) !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: linear-gradient(135deg, #ff00ff 0%, #9945ff 100%) !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: transparent !important;
+  color: #9ca3af !important;
+  border-radius: 0.5rem !important;
+}
+
+.wallet-adapter-modal-button-close:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Dropdown */
+.wallet-adapter-dropdown {
+  background: #1a1b23 !important;
+  border: 1px solid #2a2b33 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.wallet-adapter-dropdown-list {
+  background: #1a1b23 !important;
+  border-radius: 0.75rem !important;
+}
+
+.wallet-adapter-dropdown-list-item {
+  color: #ffffff !important;
+  transition: all 0.2s !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background: rgba(255, 0, 255, 0.1) !important;
+  color: #ff00ff !important;
+}
