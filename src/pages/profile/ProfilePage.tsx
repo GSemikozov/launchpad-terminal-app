@@ -10,7 +10,7 @@ export function ProfilePage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
-    <div className='min-h-screen bg-gradient-dark flex'>
+    <div className='min-h-screen bg-gradient-dark flex flex-col'>
       <Sidebar
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
